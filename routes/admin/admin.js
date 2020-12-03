@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const adminAuthMidd=require('../../middleWare/adminAuth')
 // const auth = require('../../middleware/auth');
 const adminAuth = require('../../src/controllers/adminControllers/adminAuth.js');
 // const bcrypt = require('bcryptjs');
@@ -38,35 +39,14 @@ const adminAuth = require('../../src/controllers/adminControllers/adminAuth.js')
 // 		.catch(err => console.log(err));
 // });
 
-// admin login 
+// route for admin login 
 router.post('/login', adminAuth.login);
-//end
-// //admin creates sub admit
-// router.post('/create', auth, adminauth.admincreate);
 
-// //route for getting all users
-// router.get('/users',auth,adminauth.getallusers)
+//route for create seller
+router.post('/create-seller',adminAuthMidd,adminAuth.createSeller)
 
-// //gets all farmhouses
-// router.get('/farmhouses',auth,adminauth.getallfarmhouses);
-
-// //route for getting single user
-// router.get('/user',auth,adminauth.getuser)
-
-// //gets single farmhouse
-// router.get('/farmhouse',auth,adminauth.getfarmhouse);
-
-// //route for ban user
-// router.put('/banuser', auth, adminauth.banuser)
-
-// //route for ban farmhouse
-// router.put('/banfarm', auth, adminauth.banfarm)
-
-// //route for user verification
-// router.put('/verify-user', auth, adminauth.verifyuser)
-
-// //route for farmhouse verification
-// router.put('/verify-farm', auth, adminauth.verifyfarmhouse)
+//route for get seller
+router.get('/',adminAuthMidd,adminAuth.getSingleSeller)
 
 
 module.exports = router;

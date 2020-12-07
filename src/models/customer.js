@@ -1,8 +1,8 @@
 const sequelize = require('sequelize');
 const db =require('../../config/databse');
-const Roles=require('./roles');
+const Order=require('./order');
 
-const User = db.define('user',{
+const Customer = db.define('customer',{
     id:{
         type: sequelize.UUID,
         defaultValue:sequelize.UUIDV4,
@@ -23,10 +23,9 @@ const User = db.define('user',{
         type:sequelize.STRING,
         allowNull:false
     },
-
     date_of_birth:{
         type:sequelize.DATE,
-        allowNull:false
+        allowNull:true
     },
 
     cnic:{
@@ -50,14 +49,7 @@ const User = db.define('user',{
         type:sequelize.DOUBLE,
         allowNull:true
     },
-    driving_license:{
-        type:sequelize.STRING,
-        allowNull:true
-    },
-    pharmacy_license:{
-        type:sequelize.STRING,
-        allowNull:true
-    },
+   
     createdAt:{
         type:sequelize.DATE,
         allowNull:true
@@ -66,24 +58,25 @@ const User = db.define('user',{
         type:sequelize.DATE,
         allowNull:true
     },
-    is_delete:{
+    isDelete:{
         type:sequelize.BOOLEAN,
         allowNull:true
     },
-    inactive:{
+    inActive:{
         type:sequelize.BOOLEAN,
         allowNull:true
     },
-    user_role:{
-        type:sequelize.UUID,
-        allowNull:false
-    },
-    isverified:{
-        type:sequelize.BOOLEAN,
-        allowNull:false
-    }
+   
 },{
     freezeTableName:true
 });
 
-module.exports= User;
+Customer.hasMany(Order,{
+    foreignKey: 'customer_id',
+    onDelete:'cascade',
+    hooks: true
+});
+Order.belongsTo(Customer, {
+    foreignKey: 'customer_id'
+});
+module.exports= Customer;

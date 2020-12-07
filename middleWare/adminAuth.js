@@ -28,7 +28,7 @@ module.exports = (req, res, next) => {
 		const decoded = jwt.verify(token, publicKEY, verifyOptions);
 		console.log("middle ware runs");
         console.log(decoded.user.role)
-        if(decoded.user.role=='Admin'){
+        if(decoded.user.role=='admin'){
 console.log("abcd")
             next();
         }

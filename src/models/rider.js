@@ -73,10 +73,10 @@ const Rider = db.define('rider',{
         type:sequelize.BOOLEAN,
         allowNull:false
     },
-    rating:{
-        type:sequelize.DOUBLE,
-        allowNull:true
-    }
+    // rating:{
+    //     type:sequelize.DOUBLE,
+    //     allowNull:true
+    // }
 },{
     freezeTableName:true
 });

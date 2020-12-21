@@ -107,13 +107,20 @@ module.exports = {
             return res.status(400).json({ msg: "invalid id" })
         }
         let found = true;
-        Seller.findOne({ where: { id }, attributes: ['id', 'full_name', 'email', 'phone', 'pharmacy_license', 'isVerified','rating'] })
+        Seller.findOne({ where: { id }, attributes: ['id', 'full_name', 'email', 'phone', 'pharmacy_license', 'isVerified'] })
             .then((seller) => {
                 if (!seller) {
                     found = false;
                 }
                 else {
-                    return res.status(200).json({ seller })
+                    Order.findAll({where:{seller_id:seller.id},attributes:['sellerRating']})
+                    .then((a)=>{
+                        console.log(a)
+                        const ratings=a.map(object=>object.sellerRating)
+                        let averageRating=ratings.reduce((a,b)=>{return a+b;},0)/ratings.length;
+                        return res.status(200).json({ seller,averageRating })
+
+                    })
                 }
             })
             .catch(err => {
@@ -127,7 +134,7 @@ module.exports = {
     },
     getAllsellers: (req, res) => {
         //getting all users
-        Seller.findAll({ attributes: ['full_name', 'phone', 'address','rating'] })
+        Seller.findAll({ attributes: ['full_name', 'phone', 'address'] })
             .then((sellers) => {
                 res.status(200).json({ sellers })
             })
@@ -221,13 +228,21 @@ module.exports = {
             return res.status(400).json({ msg: "invalid id" })
         }
         let found = true;
-        Rider.findOne({ where: { id }, attributes: ['id', 'full_name', 'email', 'phone', 'driving_license', 'isVerified','rating'] })
+        Rider.findOne({ where: { id }, attributes: ['id', 'full_name', 'email', 'phone', 'driving_license', 'isVerified'] })
             .then((rider) => {
                 if (!rider) {
                     found = false;
                 }
                 else {
-                    return res.status(200).json({ rider })
+                    // console.log("anari",rider.id)
+                        Order.findAll({where:{rider_id:rider.id},attributes:['riderRating']})
+                        .then((a)=>{
+                            // console.log(a)
+                            const ratings=a.map(object=>object.riderRating)
+                            let averageRating=ratings.reduce((a,b)=>{return a+b;},0)/ratings.length;
+                            return res.status(200).json({ rider, averageRating})
+                        })
+
                 }
             })
             .catch(err => {
@@ -242,7 +257,7 @@ module.exports = {
     getAllRiders: (req, res) => {
 
         //getting all users
-        Rider.findAll({ attributes: ['full_name', 'phone', 'address','rating'] })
+        Rider.findAll({ attributes: ['full_name', 'phone', 'address'] })
             .then((users) => {
                 res.status(200).json({ riders: users })
             })

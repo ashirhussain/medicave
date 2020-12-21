@@ -77,10 +77,6 @@ const Seller = db.define('seller',{
     isVerified:{
         type:sequelize.BOOLEAN,
         allowNull:false
-    },
-    rating:{
-        type:sequelize.DOUBLE,
-        allowNull:true
     }
 },{
     freezeTableName:true

@@ -30,7 +30,11 @@ const Order = db.define('order', {
         type: sequelize.BOOLEAN,
         allowNull: true
     },
-    rating: {
+    riderRating: {
+        type: sequelize.INTEGER,
+        allowNull: true
+    },
+    sellerRating: {
         type: sequelize.INTEGER,
         allowNull: true
     },

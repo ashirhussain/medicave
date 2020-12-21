@@ -1,6 +1,9 @@
 const express = require('express');
 const path = require('path');
 const admin = require('../routes/admin/admin');
+const customer = require('../routes/customer/customer');
+const rider =require('../routes/rider/rider');
+const seller =require('../routes/seller/seller');
 const cors = require('cors');
 
 
@@ -20,8 +23,17 @@ app.use(cors());
 // app.use('/',(req,res)=>{
 //     res.send("Hello World");
 // })
+//for admin routes
 app.use('/admin', admin);
 
+//for customer routes
+app.use('/customer',customer)
+
+//for rider routes
+app.use('/rider',rider)
+
+//for seller routes
+app.use('/seller',seller)
 //Creating Server------------------
 const PORT =process.env.PORT|| 5000;
 

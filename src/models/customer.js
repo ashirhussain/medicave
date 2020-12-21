@@ -1,6 +1,7 @@
 const sequelize = require('sequelize');
 const db =require('../../config/databse');
 const Order=require('./order');
+const Verification=require('./verification');
 
 const Customer = db.define('customer',{
     id:{
@@ -62,6 +63,10 @@ const Customer = db.define('customer',{
         type:sequelize.BOOLEAN,
         allowNull:true
     },
+    isVerified:{
+        type:sequelize.BOOLEAN,
+        allowNull:false
+    },
     inActive:{
         type:sequelize.BOOLEAN,
         allowNull:true
@@ -77,6 +82,15 @@ Customer.hasMany(Order,{
     hooks: true
 });
 Order.belongsTo(Customer, {
+    foreignKey: 'customer_id'
+});
+
+Customer.hasOne(Verification,{
+    foreignKey: 'customer_id',
+    onDelete:'cascade',
+    hooks: true
+});
+Verification.belongsTo(Customer, {
     foreignKey: 'customer_id'
 });
 module.exports= Customer;

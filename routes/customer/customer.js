@@ -15,6 +15,9 @@ router.post('/login',customerAuth.login)
 //route for place an order
 router.post('/place-order',customerAuthMidd,customerAuth.placeOrder)
 
+//route for add review on order
+router.put('/add-review',customerAuthMidd,customerAuth.addReview)
+
 
 
 

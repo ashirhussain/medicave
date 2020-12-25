@@ -219,5 +219,35 @@ try {
 			res.status(500).send("server error");
 		}
 		/////
+	},
+	addReview:(req,res)=>{
+		const {customer_id,order_id,review}=req.body;
+		if (!customer_id || !order_id||!review) {
+			// console.log("loging runusind")
+			return res.status(400).json({msg:"customer, order id and review required"});
+		}
+		try {
+			Order.findOne({where:{id:order_id}})
+			.then((order)=>{
+				if(order.customer_id!==customer_id){
+					return res.status(400).send("Bad Request")
+				}
+				Order.fin.update( {review },
+				{ where: { id:order_id } })
+				.then(()=>{
+					return res.status(200).json({msg:"Review added successfully"})
+				})
+			})
+			.catch((error)=>{
+				console.error(error.message);
+			return	res.status(404).send("No order Found");
+
+			})
+			
+		} catch (error) {
+			console.error(error.message);
+			res.status(500).send("server error");
+		}
+console.log("review added")
 	}
 }

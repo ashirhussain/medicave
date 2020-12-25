@@ -45,6 +45,10 @@ const Order = db.define('order', {
     description:{
         type:sequelize.STRING,
 		allowNull:true
+    },
+    review:{
+        type:sequelize.STRING,
+		allowNull:true
     }
 },{
     freezeTableName:true

@@ -134,7 +134,9 @@ module.exports = {
     },
     getAllsellers: (req, res) => {
         //getting all users
-        Seller.findAll({ attributes: ['full_name', 'phone', 'address'] })
+        Seller.findAll({ attributes: ['id','full_name', 'store_name','phone', 'address'],include:
+         [{model:Order,attributes:['sellerRating']}]
+        })
             .then((sellers) => {
                 res.status(200).json({ sellers })
             })

@@ -27,7 +27,7 @@ module.exports = (req, res, next) => {
 		console.log("middle ware runs");
         
         if(decoded.customer.role=='customer'){
-console.log("abcd")
+// console.log("abcd")
             next();
         }
 

@@ -9,7 +9,9 @@ const cors = require('cors');
 
 
 const app =express();
-app.use(express.json());
+
+app.use(express.json()) // for json
+app.use(express.urlencoded({ extended: true })) // for form data
 //Testing database--------------------
 const db =require('../config/databse')
 db.authenticate().then(()=>{

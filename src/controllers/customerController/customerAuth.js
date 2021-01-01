@@ -101,6 +101,7 @@ module.exports = {
 	},
 	login:async(req,res)=>{
 const {email,password}=req.body;
+console.log(typeof email)
 if (!email || !password) {
 	// console.log("loging runusind")
 	return res.status(400).json({msg:"username or password missing"});
@@ -157,8 +158,8 @@ try {
 
 	},
 	placeOrder:async(req,res)=>{
-		const {id,items,itemsQuantity}=req.body;
-		let newimage;
+		// const {id,items,itemsQuantity}=req.body;
+		let image;
 		try {
 			// // gathers all previously uploaded imagesname from database
 			// const farmhouse = await Farmhouse.findOne({ where: { id: req.payload.farm.id } })
@@ -170,30 +171,38 @@ try {
 			// 	return res.status(301).json({ msg: "you already uploaded 5 images please delete some images" })
 			// }
 			//gather new image from frontend form 
-			let uploaded=false;
+			// let uploaded=false;
+			// console.log(id,items,itemsQuantity)
+
 			var form = new formidable.IncomingForm();
 			form.on('fileBegin', (name, file) => {
 				file.name = file.name.replace(/\s/g, '');
 				let format = file.name.slice(file.name.lastIndexOf('.'))
-				if (format !== ".jpg" && format !== ".jpeg") return res.json({ msg: "please upload image in jpg or jpeg format" })
+				if (format !== ".jpg" && format !== ".jpeg"&&format!=='.JPG') return res.json({ msg: "please upload image in jpg or jpeg format" })
 				console.log(format)
 				let newfilename = Date.now() + format;
 
 				file.path = "./uploads/priscription/images/" + newfilename
-				newimage = newfilename
-				uploaded=true;
+				image = newfilename
+				// uploaded=true;
 			})
 
-			let formfield = await new Promise((resolve, reject) => {
+			let formfields = await new Promise((resolve, reject) => {
 				form.parse(req, (err, fields, files) => {
+					// console.log(fields)
 					if (err) {
 						console.log(err);
+					console.log("reject")
 						reject()
 						return;
 					}
-					resolve();
+					console.log("resolve")
+					resolve(fields);
 				});
 			})
+			console.log(formfields)
+		const {id,items,itemsQuantity}=formfields;
+			console.log(typeof id)
 			///adding new image to previous array
 			// if (newimage != null) {
 			// 	console.log(newimage)
@@ -201,22 +210,34 @@ try {
 			// 	console.log(imagesnames)
 			// }
 			//updates images 
-			if(!items&&!itemsQuantity&&!uploaded){
+			console.log(id,items,itemsQuantity,image)
+			if(!items&&!itemsQuantity&&!image){
 				return res.status(404).json({msg:"no data found"})
 			}
+			
+			// id=JSON.stringify(id)
+			// items=JSON.stringify(items)
+			// itemsQuantity=JSON.stringify(itemsQuantity)
+			// console.log(id,items,itemsQuantity,image)
+
 			Order.create({
 				customer_id:id,
-				image:newimage,
-				items,
-				itemsQuantity
+				image:image,
+				items:items,
+				itemsQuantity:itemsQuantity
 			})
 				.then(() => {
-					res.status(200).json({ msg: "order is been placed" })
+					console.log("then")
+				return res.status(200).json({ msg: "order is been placed" })
+				})
+				.catch((error)=>{
+					console.log(error)
+
 				})
 		}
 		catch (error) {
-			console.error(error.message);
-			res.status(500).send("server error");
+
+			return res.status(500).send("server error");
 		}
 		/////
 	},

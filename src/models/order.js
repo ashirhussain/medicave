@@ -16,11 +16,11 @@ const Order = db.define('order', {
     },
     seller_id: {
         type: sequelize.UUID,
-        allowNull: false
+        allowNull: true
     },
     rider_id: {
         type: sequelize.UUID,
-        allowNull: false
+        allowNull: true
     },
     iscompleted: {
         type: sequelize.BOOLEAN,
@@ -49,6 +49,14 @@ const Order = db.define('order', {
     review:{
         type:sequelize.STRING,
 		allowNull:true
+    },
+    items:{
+        type:sequelize.ARRAY(sequelize.STRING),
+        allowNull:false
+    },
+    itemsQuantity:{
+        type:sequelize.ARRAY(sequelize.STRING),
+        allowNull:false
     }
 },{
     freezeTableName:true

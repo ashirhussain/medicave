@@ -259,7 +259,9 @@ module.exports = {
     getAllRiders: (req, res) => {
 
         //getting all users
-        Rider.findAll({ attributes: ['full_name', 'phone', 'address'] })
+        Rider.findAll({ attributes: ['id','full_name','phone', 'address'],include:
+        [{model:Order,attributes:['riderRating']}]
+       })
             .then((users) => {
                 res.status(200).json({ riders: users })
             })
@@ -267,6 +269,7 @@ module.exports = {
                 console.log(err.message)
                 return res.status(500).json({ err: err.name })
             })
+           
     },
     updateRider: (req, res) => {
         const {

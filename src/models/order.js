@@ -57,6 +57,10 @@ const Order = db.define('order', {
     itemsQuantity:{
         type:sequelize.ARRAY(sequelize.STRING),
         allowNull:false
+    },
+    image:{
+        type:sequelize.STRING,
+        allowNull:true
     }
 },{
     freezeTableName:true

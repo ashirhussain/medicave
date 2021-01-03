@@ -161,29 +161,21 @@ try {
 		// const {id,items,itemsQuantity}=req.body;
 		let image;
 		try {
-			// // gathers all previously uploaded imagesname from database
-			// const farmhouse = await Farmhouse.findOne({ where: { id: req.payload.farm.id } })
-			// 	.catch(err => console.log(err))
-			// console.log(...farmhouse.imagesnames)
-			// let { imagesnames } = farmhouse;
-			//checks wheather you uplaoded 5 images if true then retun else continue further
-			// if (imagesnames.length === 5) {
-			// 	return res.status(301).json({ msg: "you already uploaded 5 images please delete some images" })
-			// }
-			//gather new image from frontend form 
-			// let uploaded=false;
-			// console.log(id,items,itemsQuantity)
-
 			var form = new formidable.IncomingForm();
+			// console.log(req.body)
 			form.on('fileBegin', (name, file) => {
+				// console.log(name)
 				file.name = file.name.replace(/\s/g, '');
 				let format = file.name.slice(file.name.lastIndexOf('.'))
 				if (format !== ".jpg" && format !== ".jpeg"&&format!=='.JPG') return res.json({ msg: "please upload image in jpg or jpeg format" })
-				console.log(format)
-				let newfilename = Date.now() + format;
+				// console.log(format)
+				
+				let newfilename = Date.now()
+				image = newfilename
+				newfilename+=format
 
 				file.path = "./uploads/priscription/images/" + newfilename
-				image = newfilename
+				// image = newfilename
 				// uploaded=true;
 			})
 
@@ -200,29 +192,26 @@ try {
 					resolve(fields);
 				});
 			})
-			console.log(formfields)
-		const {id,items,itemsQuantity}=formfields;
-			console.log(typeof id)
-			///adding new image to previous array
-			// if (newimage != null) {
-			// 	console.log(newimage)
-			// 	imagesnames = [...imagesnames, newimage]
-			// 	console.log(imagesnames)
-			// }
-			//updates images 
-			console.log(id,items,itemsQuantity,image)
-			if(!items&&!itemsQuantity&&!image){
+			let {id,items,itemsQuantity}=formfields;
+			if(items.length&&itemsQuantity.length){
+			console.log("ashorhussain",id,items.length,itemsQuantity.length,image)
+			items=items.split(',')
+			itemsQuantity=itemsQuantity.split(',')
+			console.log(items,itemsQuantity)
+ 
+			}
+			else{
+				items=[]
+				itemsQuantity=[]
+				console.log(items,itemsQuantity)
+			}
+			if(!items.length&&!itemsQuantity.length&&!image){
 				return res.status(404).json({msg:"no data found"})
 			}
-			
-			// id=JSON.stringify(id)
-			// items=JSON.stringify(items)
-			// itemsQuantity=JSON.stringify(itemsQuantity)
-			// console.log(id,items,itemsQuantity,image)
-
+		
 			Order.create({
 				customer_id:id,
-				image:image,
+				image,
 				items:items,
 				itemsQuantity:itemsQuantity
 			})
@@ -232,10 +221,12 @@ try {
 				})
 				.catch((error)=>{
 					console.log(error)
+			return res.status(500).send("server error");
 
 				})
 		}
 		catch (error) {
+			console.log(error)
 
 			return res.status(500).send("server error");
 		}

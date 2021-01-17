@@ -64,11 +64,11 @@ module.exports = {
     createSeller: async (req, res) => {
         console.log("seller create controller runs")
 
-        const { email, full_name, date_of_birth, cnic, phone, address, pharmacy_license, isVerified, inActive, store_name, isDelete } = req.body;
+        const { email, full_name, date_of_birth, cnic, phone, address, pharmacy_license, inActive, store_name,} = req.body;
 
 
         let { password, latitude, longitude } = req.body;
-        if (!email || !full_name || !date_of_birth || !cnic || !phone || !address || !latitude || !longitude || !pharmacy_license || !isVerified || !inActive || !store_name || !isDelete) {
+        if (!email || !full_name || !date_of_birth || !cnic || !phone || !address || !latitude || !longitude || !pharmacy_license || !inActive || !store_name) {
             return res.status(400).json("Some fields missing");
         }
         try {
@@ -82,7 +82,7 @@ module.exports = {
             longitude = longitude.toString()
 
             Seller.create({
-                inActive, email, full_name, date_of_birth, cnic, phone, address, password, latitude, longitude, pharmacy_license, isVerified, store_name, isDelete
+                inActive, email, full_name, date_of_birth, cnic, phone, address, password, latitude, longitude, pharmacy_license, isVerified:false, store_name, isDelete:false
             })
                 .then(seller => {
                     let { password, ...restSeller } = seller.get()
@@ -181,11 +181,11 @@ module.exports = {
     createRider: async (req, res) => {
         console.log("rider create controller runs")
 
-        const { email, full_name, date_of_birth, cnic, phone, address, driving_license, isVerified, inActive, isDelete } = req.body;
+        const { email, full_name, date_of_birth, cnic, phone, address, driving_license, inActive} = req.body;
 
 
         let { password, latitude, longitude } = req.body;
-        if (!email || !full_name || !date_of_birth || !cnic || !phone || !address || !latitude || !longitude || !driving_license || !isVerified || !inActive || !isDelete) {
+        if (!email || !full_name || !date_of_birth || !cnic || !phone || !address || !latitude || !longitude || !driving_license || !inActive) {
             return res.status(400).json("Some fields missing");
         }
         // const role = "subadmin";
@@ -205,7 +205,7 @@ module.exports = {
             longitude = longitude.toString()
 
             Rider.create({
-                email, full_name, date_of_birth, cnic, phone, address, password, latitude, longitude, driving_license, isVerified, inActive, isDelete
+                email, full_name, date_of_birth, cnic, phone, address, password, latitude, longitude, driving_license, isVerified:false, inActive, isDelete:false
             })
                 .then(rider => {
                     let { password, ...restRider } = rider.get()
@@ -362,7 +362,7 @@ module.exports = {
         getAllOrders:(req,res)=>{
 
             //getting all users
-            Order.findAll({ attributes: ['iscompleted', 'inprocess'],include:[{model:Seller,attributes:['full_name','email','store_name']},{model:Rider,attributes:['full_name']},{model:Customer,attributes:['full_name']}]})
+            Order.findAll({ attributes: ['id','iscompleted', 'inprocess','createdAt'],include:[{model:Seller,attributes:['full_name','email','store_name']},{model:Rider,attributes:['full_name']},{model:Customer,attributes:['full_name']}]})
                 .then((orders) => {
                     res.status(200).json({ orders })
                 })
@@ -374,7 +374,7 @@ module.exports = {
         getAllSales:(req,res)=>{
             console.log("getALlSales")
              //getting all users
-             Order.findAll({ where:{iscompleted:true}, attributes: ['iscompleted', 'inprocess'],include:[{model:Seller,attributes:['full_name','email','store_name']},{model:Rider,attributes:['full_name']},{model:Customer,attributes:['full_name']}]})
+             Order.findAll({ where:{iscompleted:true}, attributes: ['id','iscompleted', 'inprocess','createdAt'],include:[{model:Seller,attributes:['full_name','email','store_name']},{model:Rider,attributes:['full_name']},{model:Customer,attributes:['full_name']}]})
              .then((orders) => {
                  res.status(200).json({ orders })
              })

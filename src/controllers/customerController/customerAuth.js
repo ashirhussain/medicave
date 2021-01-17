@@ -8,6 +8,12 @@ const fs = require('fs');
 const privateKEY = fs.readFileSync('./private.key', 'utf8');
 const cryptoRandomString = require('crypto-random-string');
 const sgMail = require('@sendgrid/mail');
+const webpush = require("web-push");
+const publicVapidKey ="BLDECqQgUgclNByCuKfh7F5Y863XpwVwcpgTwNDxqnw829GTmHHxYnJ3gso3FegKDSeeivjAp0Q4dGzyBu9KDZw";
+const privateVapidKey = "UoL2MqxRUQjDcJYZTnSmKbfqQglwODIOgNnrMcNmvK4";
+webpush.setVapidDetails("mailto:test@test.com",
+publicVapidKey,privateVapidKey);
+
 // const { where } = require('sequelize/types');
 require('dotenv').config();
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -216,6 +222,14 @@ try {
 				itemsQuantity:itemsQuantity
 			})
 				.then(() => {
+					//push notifications for sellers
+					const title="push notifications"
+					const message="this is push notification"
+					const subscription="An order has been arrived"
+					const payload = JSON.stringify({ title, message });
+					webpush.sendNotification(subscription, payload)
+					.catch((err) => console.error("err", err));
+
 					console.log("then")
 				return res.status(200).json({ msg: "order is been placed" })
 				})

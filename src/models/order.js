@@ -61,6 +61,10 @@ const Order = db.define('order', {
     image:{
         type:sequelize.STRING,
         allowNull:true
+    },
+    amount:{
+        type:sequelize.NUMBER,
+        allowNull:true
     }
 },{
     freezeTableName:true

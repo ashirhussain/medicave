@@ -67,8 +67,8 @@ module.exports = {
         const { email, full_name, date_of_birth, cnic, phone, address, pharmacy_license, inActive, store_name,} = req.body;
 
 
-        let { password, latitude, longitude } = req.body;
-        if (!email || !full_name || !date_of_birth || !cnic || !phone || !address || !latitude || !longitude || !pharmacy_license || !inActive || !store_name) {
+        let { password} = req.body;
+        if (!email || !full_name || !date_of_birth || !cnic || !phone || !address || !pharmacy_license || !inActive || !store_name) {
             return res.status(400).json("Some fields missing");
         }
         try {
@@ -82,7 +82,7 @@ module.exports = {
             longitude = longitude.toString()
 
             Seller.create({
-                inActive, email, full_name, date_of_birth, cnic, phone, address, password, latitude, longitude, pharmacy_license, isVerified:false, store_name, isDelete:false
+                inActive, email, full_name, date_of_birth, cnic, phone, address, password, pharmacy_license, isVerified:false, store_name, isDelete:false
             })
                 .then(seller => {
                     let { password, ...restSeller } = seller.get()
@@ -107,7 +107,7 @@ module.exports = {
             return res.status(400).json({ msg: "invalid id" })
         }
         let found = true;
-        Seller.findOne({ where: { id }, attributes: ['id', 'full_name', 'email', 'phone', 'pharmacy_license', 'isVerified'] })
+        Seller.findOne({ where: { id }, attributes: ['id', 'full_name','cnic', 'email', 'phone', 'pharmacy_license', 'isVerified','store_name','address'] })
             .then((seller) => {
                 if (!seller) {
                     found = false;
@@ -184,8 +184,8 @@ module.exports = {
         const { email, full_name, date_of_birth, cnic, phone, address, driving_license, inActive} = req.body;
 
 
-        let { password, latitude, longitude } = req.body;
-        if (!email || !full_name || !date_of_birth || !cnic || !phone || !address || !latitude || !longitude || !driving_license || !inActive) {
+        let { password} = req.body;
+        if (!email || !full_name || !date_of_birth || !cnic || !phone || !address || !driving_license || !inActive) {
             return res.status(400).json("Some fields missing");
         }
         // const role = "subadmin";
@@ -205,7 +205,7 @@ module.exports = {
             longitude = longitude.toString()
 
             Rider.create({
-                email, full_name, date_of_birth, cnic, phone, address, password, latitude, longitude, driving_license, isVerified:false, inActive, isDelete:false
+                email, full_name, date_of_birth, cnic, phone, address, password, driving_license, isVerified:false, inActive, isDelete:false
             })
                 .then(rider => {
                     let { password, ...restRider } = rider.get()
@@ -230,7 +230,7 @@ module.exports = {
             return res.status(400).json({ msg: "invalid id" })
         }
         let found = true;
-        Rider.findOne({ where: { id }, attributes: ['id', 'full_name', 'email', 'phone', 'driving_license', 'isVerified'] })
+        Rider.findOne({ where: { id }, attributes: ['id', 'full_name', 'email', 'phone','address','cnic', 'driving_license', 'isVerified'] })
             .then((rider) => {
                 if (!rider) {
                     found = false;
@@ -362,7 +362,7 @@ module.exports = {
         getAllOrders:(req,res)=>{
 
             //getting all users
-            Order.findAll({ attributes: ['id','iscompleted', 'inprocess','createdAt'],include:[{model:Seller,attributes:['full_name','email','store_name']},{model:Rider,attributes:['full_name']},{model:Customer,attributes:['full_name']}]})
+            Order.findAll({ attributes: ['id','customer_id','seller_id','rider_id','iscompleted', 'inprocess','riderRating','sellerRating','isdelete','description','review','items','itemsQuantity','image','amount','createdAt'],include:[{model:Seller,attributes:['full_name','email','store_name']},{model:Rider,attributes:['full_name']},{model:Customer,attributes:['full_name']}]})
                 .then((orders) => {
                     res.status(200).json({ orders })
                 })

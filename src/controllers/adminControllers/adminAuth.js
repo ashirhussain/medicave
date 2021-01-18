@@ -165,7 +165,7 @@ module.exports = {
         }
     },
     deleteSeller: (req, res) => {
-        const { id } = req.body;
+        const { id } = req.query;
         /////////////////
         try {
             Seller.destroy({ where: { id } })
@@ -291,7 +291,7 @@ module.exports = {
         }
     },
     deleteRider: (req, res) => {
-        const { id } = req.body;
+        const { id } = req.query;
         /////////////////
         try {
             Rider.destroy({ where: { id } })

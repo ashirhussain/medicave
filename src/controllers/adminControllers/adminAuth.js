@@ -78,8 +78,8 @@ module.exports = {
             if (!password) return res.status(301).send();
             // console.log(password);
             //create gig
-            latitude = latitude.toString()
-            longitude = longitude.toString()
+            // latitude = latitude.toString()
+            // longitude = longitude.toString()
 
             Seller.create({
                 inActive, email, full_name, date_of_birth, cnic, phone, address, password, pharmacy_license, isVerified:false, store_name, isDelete:false
@@ -107,7 +107,7 @@ module.exports = {
             return res.status(400).json({ msg: "invalid id" })
         }
         let found = true;
-        Seller.findOne({ where: { id }, attributes: ['id', 'full_name','cnic', 'email', 'phone', 'pharmacy_license', 'isVerified','store_name','address'] })
+        Seller.findOne({ where: { id,isDelete:false }, attributes: ['id', 'full_name','cnic', 'email', 'phone', 'pharmacy_license', 'isVerified','store_name','address'] })
             .then((seller) => {
                 if (!seller) {
                     found = false;
@@ -134,7 +134,9 @@ module.exports = {
     },
     getAllsellers: (req, res) => {
         //getting all users
-        Seller.findAll({ attributes: ['id','full_name', 'store_name','phone', 'address'],include:
+        Seller.findAll({where:{
+            isDelete:false
+        }, attributes: ['id','full_name', 'store_name','phone', 'address'],include:
          [{model:Order,attributes:['sellerRating']}]
         })
             .then((sellers) => {
@@ -147,13 +149,13 @@ module.exports = {
     },
     updateseller: (req, res) => {
         const {
-            id, email, full_name, date_of_birth, cnic, phone, address, latitude, longitude, pharmacy_license, isVerified, inActive, isDelete, store_name
+            id, email, full_name, phone, address, latitude, longitude, pharmacy_license, isVerified, inActive, isDelete, store_name
         } = req.body;
         /////////////////
         try {
             Seller.update(
                 {
-                    id, email, store_name, full_name, date_of_birth, cnic, phone, address, latitude, longitude, pharmacy_license, isVerified, inActive, isDelete
+                    id, email, store_name, full_name, phone, address, latitude, longitude, pharmacy_license, isVerified, inActive, isDelete
                 },
                 { where: { id } })
                 .then(() => res.status(200).json({ msg: "profile updated" }))
@@ -168,7 +170,9 @@ module.exports = {
         const { id } = req.query;
         /////////////////
         try {
-            Seller.destroy({ where: { id } })
+            Seller.update({
+                isDelete:true
+            },{where: { id } })
                 .then(() => res.status(200).json({ msg: "profile deleted" }))
 
         }
@@ -185,7 +189,7 @@ module.exports = {
 
 
         let { password} = req.body;
-        if (!email || !full_name || !date_of_birth || !cnic || !phone || !address || !driving_license || !inActive) {
+        if (!email || !full_name || !date_of_birth || !cnic || !phone || !address || !driving_license) {
             return res.status(400).json("Some fields missing");
         }
         // const role = "subadmin";
@@ -201,8 +205,8 @@ module.exports = {
             if (!password) return res.status(301).send();
             // console.log(password);
             //create gig
-            latitude = latitude.toString()
-            longitude = longitude.toString()
+            // latitude = latitude.toString()
+            // longitude = longitude.toString()
 
             Rider.create({
                 email, full_name, date_of_birth, cnic, phone, address, password, driving_license, isVerified:false, inActive, isDelete:false

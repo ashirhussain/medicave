@@ -386,5 +386,31 @@ module.exports = {
                  console.log(err.message)
                  return res.status(500).json({ err: err.name })
              })
+        },
+        getSingleOrder:(req,res)=>{
+            const{id}=req.params;
+            const re=/[a-z0-9]{8}-([a-z0-9$]{4}-){3}[a-z0-9]{12}/;
+            if(!re.test(id)){
+                return res.status(400).json({msg:"Invalid Id"})
+            }
+            const found=truw;
+            Order.findOne({
+                where:{id}, attributes:['id','customer_id','seller_id','rider_id','iscompleted', 'inprocess','riderRating','sellerRating','isdelete','description','review','items','itemsQuantity','image','amount','createdAt']
+            })
+            .then((order)=>{
+                if(!order){
+                    found=false;
+                }
+                else{
+                    return res.status(200).json({order})
+                }
+            })
+            .catch((err)=>{
+                return res.status(500).json({err:err.name})
+            })
+            if(!found){
+                return res.status(404).json({msg:"No Order With this id"})
+            }
+
         }
 }

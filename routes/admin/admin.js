@@ -84,6 +84,9 @@ router.put('/customer',adminAuthMidd,adminAuth.updateCustomer)
 //route for getting all orders
 router.get('/orders',adminAuthMidd,adminAuth.getAllOrders)
 
+//route for getting all orders
+router.get('/order/:id',adminAuthMidd,adminAuth.getSingleOrder)
+
 //route to get all sales
 router.get('/sales',adminAuthMidd,adminAuth.getAllSales)
 

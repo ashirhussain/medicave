@@ -64,11 +64,11 @@ module.exports = {
     createSeller: async (req, res) => {
         console.log("seller create controller runs")
 
-        const { email, full_name, date_of_birth, cnic, phone, address, pharmacy_license, inActive, store_name,} = req.body;
+        const { email, full_name, date_of_birth, cnic, phone, address, pharmacy_license, store_name,} = req.body;
 
 
         let { password} = req.body;
-        if (!email || !full_name || !date_of_birth || !cnic || !phone || !address || !pharmacy_license || !inActive || !store_name) {
+        if (!email || !full_name || !date_of_birth || !cnic || !phone || !address || !pharmacy_license|| !store_name) {
             return res.status(400).json("Some fields missing");
         }
         try {
@@ -82,7 +82,7 @@ module.exports = {
             // longitude = longitude.toString()
 
             Seller.create({
-                inActive, email, full_name, date_of_birth, cnic, phone, address, password, pharmacy_license, isVerified:false, store_name, isDelete:false
+                inActive:false, email, full_name, date_of_birth, cnic, phone, address, password, pharmacy_license, isVerified:false, store_name, isDelete:false
             })
                 .then(seller => {
                     let { password, ...restSeller } = seller.get()
@@ -134,9 +134,11 @@ module.exports = {
     },
     getAllsellers: (req, res) => {
         //getting all users
-        Seller.findAll({where:{
+        Seller.findAll({
+            order:['createdAt','DESC']
+            ,where:{
             isDelete:false
-        }, attributes: ['id','full_name', 'store_name','phone', 'address'],include:
+        }, attributes: ['id','full_name', 'store_name','phone','cnic', 'address'],include:
          [{model:Order,attributes:['sellerRating']}]
         })
             .then((sellers) => {
@@ -263,7 +265,9 @@ module.exports = {
     getAllRiders: (req, res) => {
 
         //getting all users
-        Rider.findAll({ attributes: ['id','full_name','phone', 'address'],include:
+        Rider.findAll({
+            order:['createdAt','DESC']
+            ,attributes: ['id','full_name','phone','cnic','address'],include:
         [{model:Order,attributes:['riderRating']}]
        })
             .then((users) => {
@@ -315,7 +319,7 @@ module.exports = {
             return res.status(400).json({ msg: "invalid id" })
         }
         let found = true;
-        Customer.findOne({ where: { id }, attributes: ['id', 'full_name', 'email', 'phone'] })
+        Customer.findOne({ where: { id }, attributes: ['id','address','cnic', 'full_name', 'email', 'phone'] })
             .then((customer) => {
                 if (!customer) {
                     found = false;
@@ -336,7 +340,9 @@ module.exports = {
     getAllCustomers: (req, res) => {
 
         //getting all users
-        Customer.findAll({ attributes: ['full_name', 'phone', 'address'] })
+        Customer.findAll({
+            order:['createdAt','DESC']
+            ,attributes: ['id','cnic','full_name', 'phone', 'address'] })
             .then((customers) => {
                 res.status(200).json({ customers })
             })
@@ -366,7 +372,9 @@ module.exports = {
         getAllOrders:(req,res)=>{
 
             //getting all users
-            Order.findAll({ attributes: ['id','customer_id','seller_id','rider_id','iscompleted', 'inprocess','riderRating','sellerRating','isdelete','description','review','items','itemsQuantity','image','amount','createdAt'],include:[{model:Seller,attributes:['full_name','email','store_name']},{model:Rider,attributes:['full_name']},{model:Customer,attributes:['full_name']}]})
+            Order.findAll({
+                  order:['createdAt','DESC']
+                 ,attributes: ['id','customer_id','seller_id','rider_id','iscompleted', 'inprocess','riderRating','sellerRating','isdelete','description','review','items','itemsQuantity','image','amount','createdAt'],include:[{model:Seller,attributes:['full_name','email','store_name']},{model:Rider,attributes:['full_name']},{model:Customer,attributes:['full_name']}]})
                 .then((orders) => {
                     res.status(200).json({ orders })
                 })
@@ -378,7 +386,9 @@ module.exports = {
         getAllSales:(req,res)=>{
             console.log("getALlSales")
              //getting all users
-             Order.findAll({ where:{iscompleted:true}, attributes: ['id','iscompleted', 'inprocess','createdAt'],include:[{model:Seller,attributes:['full_name','email','store_name']},{model:Rider,attributes:['full_name']},{model:Customer,attributes:['full_name']}]})
+             Order.findAll({
+                   order:['createdAt','DESC']
+                  ,where:{iscompleted:true}, attributes: ['id','iscompleted', 'inprocess','createdAt'],include:[{model:Seller,attributes:['full_name','email','store_name']},{model:Rider,attributes:['full_name']},{model:Customer,attributes:['full_name']}]})
              .then((orders) => {
                  res.status(200).json({ orders })
              })

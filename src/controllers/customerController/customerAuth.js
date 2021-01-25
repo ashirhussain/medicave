@@ -167,7 +167,7 @@ try {
 		// const {id,items,itemsQuantity}=req.body;
 		let image;
 		try {
-			var form = new formidable.IncomingForm();
+			const form = new formidable.IncomingForm();
 			// console.log(req.body)
 			form.on('fileBegin', (name, file) => {
 				// console.log(name)
@@ -258,7 +258,7 @@ try {
 				if(order.customer_id!==customer_id){
 					return res.status(400).send("Bad Request")
 				}
-				Order.fin.update( {review },
+				Order.update( {review },
 				{ where: { id:order_id } })
 				.then(()=>{
 					return res.status(200).json({msg:"Review added successfully"})

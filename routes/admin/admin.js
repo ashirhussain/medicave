@@ -90,7 +90,14 @@ router.get('/order/:id',adminAuthMidd,adminAuth.getSingleOrder)
 //route to get all sales
 router.get('/sales',adminAuthMidd,adminAuth.getAllSales)
 
+//route for forget password
+router.post('/forget-password',adminAuth.forgetPassword)
 
+//route for upload driving license image
+router.post('/upload-diving-license',adminAuthMidd,adminAuth.uploadDrivingLicense)
+
+//route for upload pharma license image
+router.post('/upload-pharma-license',adminAuthMidd,adminAuth.uploadPharmacyLicense)
 
 
 module.exports = router;

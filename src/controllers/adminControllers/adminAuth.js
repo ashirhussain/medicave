@@ -1,14 +1,20 @@
 // const Roles = require('../../models/roles');
 const Admin = require('../../models/admin');
 const Seller = require('../../models/seller');
+const formidable = require('formidable');
 const Rider = require('../../models/rider');
 const Order = require('../../models/order');
 const Customer = require('../../models/customer');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const sgMail = require('@sendgrid/mail');
+const cryptoRandomString = require('crypto-random-string');
 const fs = require('fs');
 const { parse } = require('path');
 const privateKEY = fs.readFileSync('./private.key', 'utf8');
+require('dotenv').config();
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
 module.exports = {
     login: async (req, res) => {
         const { email, password } = req.body;
@@ -422,5 +428,134 @@ module.exports = {
                 return res.status(404).json({msg:"No Order With this id"})
             }
 
+        },
+       forgetPassword: async (req,res) => {
+            const {email}=req.body;
+            Admin.findOne({where:{email}})
+            .then((admin)=>{
+                if(!admin){
+                    return res.status(400).json({msg:"bad request"})
+                }
+            const {id}=admin;
+            const newPassword=  cryptoRandomString({length:10,type:'base64'})
+            if (!newPassword) return res.status(301).send();
+            const salt = bcrypt.genSaltSync(10);
+            if (!salt) return res.status(301).send();
+            const passwordHash= bcrypt.hashSync(newPassword, salt);
+            if (!passwordHash) return res.status(301).send();
+           Admin.update({password:passwordHash},{where:{id}})
+           .then(()=>{
+               console.log(newPassword,passwordHash,"new pas,password hash")
+            const msg = {
+                to: 'hussainashir9090@gmail.com',
+                from: 'hussainashir87@gmail.com',
+                subject: 'Request for new password',
+                text: 'Your password has been changed',
+                html: `<p><strong>New password : </strong>${newPassword}</p>`,
+            };
+            sgMail.send(msg);
+            return res.json({ msg: "Password sended to your email" })
+           })
+            })
+            .catch(error=>{
+                console.error(error.message);
+				return res.status(500).send("server error");
+            })
+            
+        },
+        uploadDrivingLicense:async(req,res)=>{
+            const {id}=req.query;
+            // const newfilename=res.locals.newfilename
+            if(!id) return res.status(404).json({msg:"bad request"})
+            let image
+            // let newfilename
+            const form = new formidable.IncomingForm();
+			console.log(id)
+			form.on('fileBegin', (name, file) => {
+                console.log(name)
+				file.name = file.name.replace(/\s/g, '');
+				let format = file.name.slice(file.name.lastIndexOf('.'))
+				if (format !== ".jpg" && format !== ".jpeg"&&format!=='.JPG') return res.json({ msg: "please upload image in jpg or jpeg format" })
+				// console.log(format)
+				
+                let newfilename = Date.now()
+                console.log(newfilename)
+				image = newfilename
+				newfilename+=format
+				file.path = "./uploads/drivingLicense/images/" + newfilename
+				// image = newfilename
+				// uploaded=true;
+            })
+            let formfield = await new Promise((resolve, reject) => {
+				form.parse(req, (err, fields, files) => {
+					if (err) {
+						console.log(err);
+						reject()
+						return;
+					}
+					resolve();
+				});
+			})
+            console.log("after")
+            // console.log(id,newfilename,"from update database")
+            Rider.update(
+                {driving_license:image},
+                {where:{id}}
+            )
+            .then(()=>{
+                return res.status(200).json({msg:"image uploaded sucessfully"})
+            })
+            .catch((err)=>{
+                console.log(err)
+                return res.status(500).send("server error");
+            })
+        },
+        uploadPharmacyLicense:async(req,res)=>{
+            const {id}=req.query;
+            // const newfilename=res.locals.newfilename
+            if(!id) return res.status(404).json({msg:"bad request"})
+            let image
+            // let newfilename
+            const form = new formidable.IncomingForm();
+			console.log(id)
+			form.on('fileBegin', (name, file) => {
+                console.log(name)
+				file.name = file.name.replace(/\s/g, '');
+				let format = file.name.slice(file.name.lastIndexOf('.'))
+				if (format !== ".jpg" && format !== ".jpeg"&&format!=='.JPG') return res.json({ msg: "please upload image in jpg or jpeg format" })
+				// console.log(format)
+				
+                let newfilename = Date.now()
+                console.log(newfilename)
+				image = newfilename
+				newfilename+=format
+				file.path = "./uploads/pharmacyLicense/images/" + newfilename
+				// image = newfilename
+				// uploaded=true;
+            })
+            let formfield = await new Promise((resolve, reject) => {
+				form.parse(req, (err, fields, files) => {
+					if (err) {
+						console.log(err);
+						reject()
+						return;
+					}
+					resolve();
+				});
+			})
+            console.log("after")
+            // console.log(id,newfilename,"from update database")
+            Seller.update(
+                {pharmacy_license:image},
+                {where:{id}}
+            )
+            .then(()=>{
+                return res.status(200).json({msg:"image uploaded sucessfully"})
+            })
+            .catch((err)=>{
+                console.log(err)
+                return res.status(500).send("server error");
+            })
         }
+    
 }

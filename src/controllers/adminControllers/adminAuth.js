@@ -11,6 +11,8 @@ const sgMail = require('@sendgrid/mail');
 const cryptoRandomString = require('crypto-random-string');
 const fs = require('fs');
 const { parse } = require('path');
+const Sequilize = require('sequelize').Sequelize;
+const op = Sequilize.Op;
 const privateKEY = fs.readFileSync('./private.key', 'utf8');
 require('dotenv').config();
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -70,11 +72,11 @@ module.exports = {
     createSeller: async (req, res) => {
         console.log("seller create controller runs")
 
-        const { email, full_name, date_of_birth, cnic, phone, address, pharmacy_license, store_name,} = req.body;
+        const { email, full_name, date_of_birth, cnic, phone, address, pharmacy_license, store_name, } = req.body;
 
 
-        let { password} = req.body;
-        if (!email || !full_name || !date_of_birth || !cnic || !phone || !address || !pharmacy_license|| !store_name) {
+        let { password } = req.body;
+        if (!email || !full_name || !date_of_birth || !cnic || !phone || !address || !pharmacy_license || !store_name) {
             return res.status(400).json("Some fields missing");
         }
         try {
@@ -88,7 +90,7 @@ module.exports = {
             // longitude = longitude.toString()
 
             Seller.create({
-                inActive:false, email, full_name, date_of_birth, cnic, phone, address, password, pharmacy_license, isVerified:false, store_name, isDelete:false
+                inActive: false, email, full_name, date_of_birth, cnic, phone, address, password, pharmacy_license, isVerified: false, store_name, isDelete: false
             })
                 .then(seller => {
                     let { password, ...restSeller } = seller.get()
@@ -113,20 +115,20 @@ module.exports = {
             return res.status(400).json({ msg: "invalid id" })
         }
         let found = true;
-        Seller.findOne({ where: { id,isDelete:false }, attributes: ['id', 'full_name','cnic', 'email', 'phone', 'pharmacy_license', 'isVerified','store_name','address'] })
+        Seller.findOne({ where: { id, isDelete: false }, attributes: ['id', 'full_name', 'cnic', 'email', 'phone', 'pharmacy_license', 'isVerified', 'store_name', 'address', 'inActive'] })
             .then((seller) => {
                 if (!seller) {
                     found = false;
                 }
                 else {
-                    Order.findAll({where:{seller_id:seller.id},attributes:['sellerRating']})
-                    .then((a)=>{
-                        console.log(a)
-                        const ratings=a.map(object=>object.sellerRating)
-                        let averageRating=ratings.reduce((a,b)=>{return a+b;},0)/ratings.length;
-                        return res.status(200).json({ seller,averageRating })
+                    Order.findAll({ where: { seller_id: seller.id }, attributes: ['sellerRating'] })
+                        .then((a) => {
+                            console.log(a)
+                            const ratings = a.map(object => object.sellerRating)
+                            let averageRating = ratings.reduce((a, b) => { return a + b; }, 0) / ratings.length;
+                            return res.status(200).json({ seller, averageRating })
 
-                    })
+                        })
                 }
             })
             .catch(err => {
@@ -141,11 +143,20 @@ module.exports = {
     getAllsellers: (req, res) => {
         //getting all users
         Seller.findAll({
-            order:['createdAt','DESC']
-            ,where:{
-            isDelete:false
-        }, attributes: ['id','full_name', 'store_name','phone','cnic', 'address'],include:
-         [{model:Order,attributes:['sellerRating']}]
+            order: [
+                ['createdAt', 'DESC']
+            ],
+            where: {
+                isDelete: false,
+                cnic: {
+                    [op.iLike]: `${req.query.seacrhterm}%`
+                },
+            },
+            attributes: ['id', 'full_name', 'store_name', 'phone', 'cnic', 'address'],
+            include: [{
+                model: Order,
+                attributes: ['sellerRating']
+            }]
         })
             .then((sellers) => {
                 res.status(200).json({ sellers })
@@ -179,8 +190,8 @@ module.exports = {
         /////////////////
         try {
             Seller.update({
-                isDelete:true
-            },{where: { id } })
+                isDelete: true
+            }, { where: { id } })
                 .then(() => res.status(200).json({ msg: "profile deleted" }))
 
         }
@@ -193,10 +204,10 @@ module.exports = {
     createRider: async (req, res) => {
         console.log("rider create controller runs")
 
-        const { email, full_name, date_of_birth, cnic, phone, address, driving_license, inActive} = req.body;
+        const { email, full_name, date_of_birth, cnic, phone, address, driving_license, inActive } = req.body;
 
 
-        let { password} = req.body;
+        let { password } = req.body;
         if (!email || !full_name || !date_of_birth || !cnic || !phone || !address || !driving_license) {
             return res.status(400).json("Some fields missing");
         }
@@ -217,7 +228,7 @@ module.exports = {
             // longitude = longitude.toString()
 
             Rider.create({
-                email, full_name, date_of_birth, cnic, phone, address, password, driving_license, isVerified:false, inActive, isDelete:false
+                email, full_name, date_of_birth, cnic, phone, address, password, driving_license, isVerified: false, inActive: false, isDelete: false
             })
                 .then(rider => {
                     let { password, ...restRider } = rider.get()
@@ -242,19 +253,19 @@ module.exports = {
             return res.status(400).json({ msg: "invalid id" })
         }
         let found = true;
-        Rider.findOne({ where: { id }, attributes: ['id', 'full_name', 'email', 'phone','address','cnic', 'driving_license', 'isVerified'] })
+        Rider.findOne({ where: { id }, attributes: ['id', 'full_name', 'email', 'phone', 'address', 'cnic', 'driving_license', 'isVerified', 'inActive'] })
             .then((rider) => {
                 if (!rider) {
                     found = false;
                 }
                 else {
                     // console.log("anari",rider.id)
-                        Order.findAll({where:{rider_id:rider.id},attributes:['riderRating']})
-                        .then((a)=>{
+                    Order.findAll({ where: { rider_id: rider.id }, attributes: ['riderRating'] })
+                        .then((a) => {
                             // console.log(a)
-                            const ratings=a.map(object=>object.riderRating)
-                            let averageRating=ratings.reduce((a,b)=>{return a+b;},0)/ratings.length;
-                            return res.status(200).json({ rider, averageRating})
+                            const ratings = a.map(object => object.riderRating)
+                            let averageRating = ratings.reduce((a, b) => { return a + b; }, 0) / ratings.length;
+                            return res.status(200).json({ rider, averageRating })
                         })
 
                 }
@@ -272,10 +283,19 @@ module.exports = {
 
         //getting all users
         Rider.findAll({
-            order:['createdAt','DESC']
-            ,attributes: ['id','full_name','phone','cnic','address'],include:
-        [{model:Order,attributes:['riderRating']}]
-       })
+            order: [
+                ['createdAt', 'DESC']
+            ],
+            where: {
+                isDelete: false,
+                cnic: {
+                    [op.iLike]: `${req.query.searchterm}%`
+                },
+            }
+
+            , attributes: ['id', 'full_name', 'phone', 'cnic', 'address'], include:
+                [{ model: Order, attributes: ['riderRating'] }]
+        })
             .then((users) => {
                 res.status(200).json({ riders: users })
             })
@@ -283,7 +303,7 @@ module.exports = {
                 console.log(err.message)
                 return res.status(500).json({ err: err.name })
             })
-           
+
     },
     updateRider: (req, res) => {
         const {
@@ -308,7 +328,10 @@ module.exports = {
         const { id } = req.query;
         /////////////////
         try {
-            Rider.destroy({ where: { id } })
+            Rider.update({
+                isDelete: true
+            },
+                { where: { id } })
                 .then(() => res.status(200).json({ msg: "profile deleted" }))
         }
         catch (error) {
@@ -325,7 +348,7 @@ module.exports = {
             return res.status(400).json({ msg: "invalid id" })
         }
         let found = true;
-        Customer.findOne({ where: { id }, attributes: ['id','address','cnic', 'full_name', 'email', 'phone'] })
+        Customer.findOne({ where: { id }, attributes: ['id', 'address', 'cnic', 'full_name', 'email', 'phone'] })
             .then((customer) => {
                 if (!customer) {
                     found = false;
@@ -347,8 +370,11 @@ module.exports = {
 
         //getting all users
         Customer.findAll({
-            order:['createdAt','DESC']
-            ,attributes: ['id','cnic','full_name', 'phone', 'address'] })
+            order: [
+                ['createdAt', 'DESC']
+            ]
+            , attributes: ['id', 'cnic', 'full_name', 'phone', 'address', 'email']
+        })
             .then((customers) => {
                 res.status(200).json({ customers })
             })
@@ -375,187 +401,194 @@ module.exports = {
             res.status(500).send("server error");
         }
     },
-        getAllOrders:(req,res)=>{
+    getAllOrders: (req, res) => {
 
-            //getting all users
-            Order.findAll({
-                  order:['createdAt','DESC']
-                 ,attributes: ['id','customer_id','seller_id','rider_id','iscompleted', 'inprocess','riderRating','sellerRating','isdelete','description','review','items','itemsQuantity','image','amount','createdAt'],include:[{model:Seller,attributes:['full_name','email','store_name']},{model:Rider,attributes:['full_name']},{model:Customer,attributes:['full_name']}]})
-                .then((orders) => {
-                    res.status(200).json({ orders })
-                })
-                .catch(err => {
-                    console.log(err.message)
-                    return res.status(500).json({ err: err.name })
-                })
-        },
-        getAllSales:(req,res)=>{
-            console.log("getALlSales")
-             //getting all users
-             Order.findAll({
-                   order:['createdAt','DESC']
-                  ,where:{iscompleted:true}, attributes: ['id','iscompleted', 'inprocess','createdAt'],include:[{model:Seller,attributes:['full_name','email','store_name']},{model:Rider,attributes:['full_name']},{model:Customer,attributes:['full_name']}]})
-             .then((orders) => {
-                 res.status(200).json({ orders })
-             })
-             .catch(err => {
-                 console.log(err.message)
-                 return res.status(500).json({ err: err.name })
-             })
-        },
-        getSingleOrder:(req,res)=>{
-            const{id}=req.params;
-            const re=/[a-z0-9]{8}-([a-z0-9$]{4}-){3}[a-z0-9]{12}/;
-            if(!re.test(id)){
-                return res.status(400).json({msg:"Invalid Id"})
-            }
-            const found=truw;
-            Order.findOne({
-                where:{id}, attributes:['id','customer_id','seller_id','rider_id','iscompleted', 'inprocess','riderRating','sellerRating','isdelete','description','review','items','itemsQuantity','image','amount','createdAt']
+        //getting all users
+        Order.findAll({
+            order: [
+                ['createdAt', 'DESC']
+            ]
+            , attributes: ['id', 'customer_id', 'seller_id', 'rider_id', 'iscompleted', 'inprocess', 'riderRating', 'sellerRating', 'isdelete', 'description', 'review', 'items', 'itemsQuantity', 'image', 'amount', 'createdAt'], include: [{ model: Seller, attributes: ['full_name', 'email', 'store_name'] }, { model: Rider, attributes: ['full_name'] }, { model: Customer, attributes: ['full_name'] }]
+        })
+            .then((orders) => {
+                res.status(200).json({ orders })
             })
-            .then((order)=>{
-                if(!order){
-                    found=false;
-                }
-                else{
-                    return res.status(200).json({order})
-                }
+            .catch(err => {
+                console.log(err.message)
+                return res.status(500).json({ err: err.name })
             })
-            .catch((err)=>{
-                return res.status(500).json({err:err.name})
+    },
+    getAllSales: (req, res) => {
+        console.log("getALlSales")
+        //getting all users
+        Order.findAll({
+            order: [
+                ['createdAt', 'DESC']
+            ]
+            , where: { iscompleted: true }, attributes: ['id', 'iscompleted', 'inprocess', 'createdAt'], include: [{ model: Seller, attributes: ['full_name', 'email', 'store_name'] }, { model: Rider, attributes: ['full_name'] }, { model: Customer, attributes: ['full_name'] }]
+        })
+            .then((orders) => {
+                res.status(200).json({ orders })
             })
-            if(!found){
-                return res.status(404).json({msg:"No Order With this id"})
-            }
-
-        },
-       forgetPassword: async (req,res) => {
-            const {email}=req.body;
-            Admin.findOne({where:{email}})
-            .then((admin)=>{
-                if(!admin){
-                    return res.status(400).json({msg:"bad request"})
-                }
-            const {id}=admin;
-            const newPassword=  cryptoRandomString({length:10,type:'base64'})
-            if (!newPassword) return res.status(301).send();
-            const salt = bcrypt.genSaltSync(10);
-            if (!salt) return res.status(301).send();
-            const passwordHash= bcrypt.hashSync(newPassword, salt);
-            if (!passwordHash) return res.status(301).send();
-           Admin.update({password:passwordHash},{where:{id}})
-           .then(()=>{
-               console.log(newPassword,passwordHash,"new pas,password hash")
-            const msg = {
-                to: 'hussainashir9090@gmail.com',
-                from: 'hussainashir87@gmail.com',
-                subject: 'Request for new password',
-                text: 'Your password has been changed',
-                html: `<p><strong>New password : </strong>${newPassword}</p>`,
-            };
-            sgMail.send(msg);
-            return res.json({ msg: "Password sended to your email" })
-           })
+            .catch(err => {
+                console.log(err.message)
+                return res.status(500).json({ err: err.name })
             })
-            .catch(error=>{
-                console.error(error.message);
-				return res.status(500).send("server error");
-            })
-            
-        },
-        uploadDrivingLicense:async(req,res)=>{
-            const {id}=req.query;
-            // const newfilename=res.locals.newfilename
-            if(!id) return res.status(404).json({msg:"bad request"})
-            let image
-            // let newfilename
-            const form = new formidable.IncomingForm();
-			console.log(id)
-			form.on('fileBegin', (name, file) => {
-                console.log(name)
-				file.name = file.name.replace(/\s/g, '');
-				let format = file.name.slice(file.name.lastIndexOf('.'))
-				if (format !== ".jpg" && format !== ".jpeg"&&format!=='.JPG') return res.json({ msg: "please upload image in jpg or jpeg format" })
-				// console.log(format)
-				
-                let newfilename = Date.now()
-                console.log(newfilename)
-				image = newfilename
-				newfilename+=format
-				file.path = "./uploads/drivingLicense/images/" + newfilename
-				// image = newfilename
-				// uploaded=true;
-            })
-            let formfield = await new Promise((resolve, reject) => {
-				form.parse(req, (err, fields, files) => {
-					if (err) {
-						console.log(err);
-						reject()
-						return;
-					}
-					resolve();
-				});
-			})
-            console.log("after")
-            // console.log(id,newfilename,"from update database")
-            Rider.update(
-                {driving_license:image},
-                {where:{id}}
-            )
-            .then(()=>{
-                return res.status(200).json({msg:"image uploaded sucessfully"})
-            })
-            .catch((err)=>{
-                console.log(err)
-                return res.status(500).send("server error");
-            })
-        },
-        uploadPharmacyLicense:async(req,res)=>{
-            const {id}=req.query;
-            // const newfilename=res.locals.newfilename
-            if(!id) return res.status(404).json({msg:"bad request"})
-            let image
-            // let newfilename
-            const form = new formidable.IncomingForm();
-			console.log(id)
-			form.on('fileBegin', (name, file) => {
-                console.log(name)
-				file.name = file.name.replace(/\s/g, '');
-				let format = file.name.slice(file.name.lastIndexOf('.'))
-				if (format !== ".jpg" && format !== ".jpeg"&&format!=='.JPG') return res.json({ msg: "please upload image in jpg or jpeg format" })
-				// console.log(format)
-				
-                let newfilename = Date.now()
-                console.log(newfilename)
-				image = newfilename
-				newfilename+=format
-				file.path = "./uploads/pharmacyLicense/images/" + newfilename
-				// image = newfilename
-				// uploaded=true;
-            })
-            let formfield = await new Promise((resolve, reject) => {
-				form.parse(req, (err, fields, files) => {
-					if (err) {
-						console.log(err);
-						reject()
-						return;
-					}
-					resolve();
-				});
-			})
-            console.log("after")
-            // console.log(id,newfilename,"from update database")
-            Seller.update(
-                {pharmacy_license:image},
-                {where:{id}}
-            )
-            .then(()=>{
-                return res.status(200).json({msg:"image uploaded sucessfully"})
-            })
-            .catch((err)=>{
-                console.log(err)
-                return res.status(500).send("server error");
-            })
+    },
+    getSingleOrder: (req, res) => {
+        console.log("Single Order Running")
+        const { id } = req.params;
+        const re = /[a-z0-9]{8}-([a-z0-9$]{4}-){3}[a-z0-9]{12}/;
+        if (!re.test(id)) {
+            return res.status(400).json({ msg: "Invalid Id" })
         }
-    
+        const found = true;
+        Order.findOne({
+            where: { id }, attributes: ['id', 'customer_id', 'seller_id', 'rider_id', 'iscompleted', 'inprocess', 'riderRating', 'sellerRating', 'isdelete', 'description', 'review', 'items', 'itemsQuantity', 'image', 'amount', 'createdAt'], include: [{ model: Seller, attributes: ['full_name', 'email', 'store_name'] }, { model: Rider, attributes: ['full_name'] }, { model: Customer, attributes: ['full_name'] }]
+        })
+            .then((order) => {
+                if (!order) {
+                    found = false;
+                }
+                else {
+                    return res.status(200).json({ order })
+                }
+            })
+            .catch((err) => {
+                return res.status(500).json({ err: err.name })
+            })
+        if (!found) {
+            return res.status(404).json({ msg: "No Order With this id" })
+        }
+
+    },
+    forgetPassword: async (req, res) => {
+        const { email } = req.body;
+        Admin.findOne({ where: { email } })
+            .then((admin) => {
+                if (!admin) {
+                    return res.status(400).json({ msg: "bad request" })
+                }
+                const { id } = admin;
+                const newPassword = cryptoRandomString({ length: 10, type: 'base64' })
+                if (!newPassword) return res.status(301).send();
+                const salt = bcrypt.genSaltSync(10);
+                if (!salt) return res.status(301).send();
+                const passwordHash = bcrypt.hashSync(newPassword, salt);
+                if (!passwordHash) return res.status(301).send();
+                Admin.update({ password: passwordHash }, { where: { id } })
+                    .then(() => {
+                        console.log(newPassword, passwordHash, "new pas,password hash")
+                        const msg = {
+                            to: 'hussainashir9090@gmail.com',
+                            from: 'hussainashir87@gmail.com',
+                            subject: 'Request for new password',
+                            text: 'Your password has been changed',
+                            html: `<p><strong>New password : </strong>${newPassword}</p>`,
+                        };
+                        sgMail.send(msg);
+                        return res.json({ msg: "Password sended to your email" })
+                    })
+            })
+            .catch(error => {
+                console.error(error.message);
+                return res.status(500).send("server error");
+            })
+
+    },
+    uploadDrivingLicense: async (req, res) => {
+        const { id } = req.query;
+        // const newfilename=res.locals.newfilename
+        if (!id) return res.status(404).json({ msg: "bad request" })
+        let image
+        // let newfilename
+        const form = new formidable.IncomingForm();
+        console.log(id)
+        form.on('fileBegin', (name, file) => {
+            console.log(name)
+            file.name = file.name.replace(/\s/g, '');
+            let format = file.name.slice(file.name.lastIndexOf('.'))
+            if (format !== ".jpg" && format !== ".jpeg" && format !== '.JPG') return res.json({ msg: "please upload image in jpg or jpeg format" })
+            // console.log(format)
+
+            let newfilename = Date.now()
+            console.log(newfilename)
+            image = newfilename
+            newfilename += format
+            file.path = "./uploads/drivingLicense/images/" + newfilename
+            // image = newfilename
+            // uploaded=true;
+        })
+        let formfield = await new Promise((resolve, reject) => {
+            form.parse(req, (err, fields, files) => {
+                if (err) {
+                    console.log(err);
+                    reject()
+                    return;
+                }
+                resolve();
+            });
+        })
+        console.log("after")
+        // console.log(id,newfilename,"from update database")
+        Rider.update(
+            { driving_license: image },
+            { where: { id } }
+        )
+            .then(() => {
+                return res.status(200).json({ msg: "image uploaded sucessfully" })
+            })
+            .catch((err) => {
+                console.log(err)
+                return res.status(500).send("server error");
+            })
+    },
+    uploadPharmacyLicense: async (req, res) => {
+        const { id } = req.query;
+        // const newfilename=res.locals.newfilename
+        if (!id) return res.status(404).json({ msg: "bad request" })
+        let image
+        // let newfilename
+        const form = new formidable.IncomingForm();
+        console.log(id)
+        form.on('fileBegin', (name, file) => {
+            console.log(name)
+            file.name = file.name.replace(/\s/g, '');
+            let format = file.name.slice(file.name.lastIndexOf('.'))
+            if (format !== ".jpg" && format !== ".jpeg" && format !== '.JPG') return res.json({ msg: "please upload image in jpg or jpeg format" })
+            // console.log(format)
+
+            let newfilename = Date.now()
+            console.log(newfilename)
+            image = newfilename
+            newfilename += format
+            file.path = "./uploads/pharmacyLicense/images/" + newfilename
+            // image = newfilename
+            // uploaded=true;
+        })
+        let formfield = await new Promise((resolve, reject) => {
+            form.parse(req, (err, fields, files) => {
+                if (err) {
+                    console.log(err);
+                    reject()
+                    return;
+                }
+                resolve();
+            });
+        })
+        console.log("after")
+        // console.log(id,newfilename,"from update database")
+        Seller.update(
+            { pharmacy_license: image },
+            { where: { id } }
+        )
+            .then(() => {
+                return res.status(200).json({ msg: "image uploaded sucessfully" })
+            })
+            .catch((err) => {
+                console.log(err)
+                return res.status(500).send("server error");
+            })
+    }
+
 }

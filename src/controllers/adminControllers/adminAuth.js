@@ -204,7 +204,7 @@ module.exports = {
     createRider: async (req, res) => {
         console.log("rider create controller runs")
 
-        const { email, full_name, date_of_birth, cnic, phone, address, driving_license, inActive } = req.body;
+        const { email, full_name, date_of_birth, cnic, phone, address, driving_license } = req.body;
 
 
         let { password } = req.body;
@@ -425,7 +425,7 @@ module.exports = {
             order: [
                 ['createdAt', 'DESC']
             ]
-            , where: { iscompleted: true }, attributes: ['id', 'iscompleted', 'inprocess', 'createdAt'], include: [{ model: Seller, attributes: ['full_name', 'email', 'store_name'] }, { model: Rider, attributes: ['full_name'] }, { model: Customer, attributes: ['full_name'] }]
+            , where: { iscompleted: true }, attributes: ['id', 'iscompleted', 'inprocess', 'createdAt','amount'], include: [{ model: Seller, attributes: ['full_name', 'email', 'store_name'] }, { model: Rider, attributes: ['full_name'] }, { model: Customer, attributes: ['full_name'] }]
         })
             .then((orders) => {
                 res.status(200).json({ orders })

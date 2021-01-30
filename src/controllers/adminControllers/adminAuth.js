@@ -73,7 +73,14 @@ module.exports = {
         console.log("seller create controller runs")
 
         const { email, full_name, date_of_birth, cnic, phone, address, pharmacy_license, store_name, } = req.body;
+     let seller = await Seller.findOne({where:{phone}})
+        if(seller) return res.status(400).json({msg:"seller already exist with this field(s)"})
 
+         seller = await Seller.findOne({where:{email}})
+        if(seller) return res.status(400).json({msg:"seller already exist with this field(s)"})
+
+         seller = await Seller.findOne({where:{cnic}})
+        if(seller) return res.status(400).json({msg:"seller already exist with this field(s)"})
 
         let { password } = req.body;
         if (!email || !full_name || !date_of_birth || !cnic || !phone || !address || !pharmacy_license || !store_name) {
@@ -205,7 +212,14 @@ module.exports = {
         console.log("rider create controller runs")
 
         const { email, full_name, date_of_birth, cnic, phone, address, driving_license } = req.body;
+        let rider = await Rider.findOne({where:{phone}})
+        if(rider) return res.status(400).json({msg:"rider already exist with this field(s)"})
 
+         rider = await Rider.findOne({where:{email}})
+        if(rider) return res.status(400).json({msg:"rider already exist with this field(s)"})
+
+         rider = await Rider.findOne({where:{cnic}})
+        if(rider) return res.status(400).json({msg:"rider already exist with this field(s)"})
 
         let { password } = req.body;
         if (!email || !full_name || !date_of_birth || !cnic || !phone || !address || !driving_license) {
@@ -463,7 +477,7 @@ module.exports = {
 
     },
     forgetPassword: async (req, res) => {
-        const { email } = req.body;
+        const { email } = req.params;
         Admin.findOne({ where: { email } })
             .then((admin) => {
                 if (!admin) {
@@ -589,6 +603,23 @@ module.exports = {
                 console.log(err)
                 return res.status(500).send("server error");
             })
+    },
+    getAdmin:(req,res)=>{
+        try {
+            // console.log('from controller',req.payload.id)
+            const id=req.payload.id
+            Admin.findOne({ where: { id },attributes:['id','full_name','phone','email'] })
+            .then((Admin)=>{
+                return res.status(200).json({Admin})
+            })
+            .catch((err) => {
+                console.log(err)
+                return res.status(500).send("server error");
+            })
+        } catch (error) {
+            console.log(err)
+            return res.status(500).send("server error");
+        }
     }
 
 }

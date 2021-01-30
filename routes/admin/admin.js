@@ -38,6 +38,8 @@ const adminAuth = require('../../src/controllers/adminControllers/adminAuth.js')
 // 		.then(admin => res.json("user created"))
 // 		.catch(err => console.log(err));
 // });
+// route for getting admin profile
+router.get('/',adminAuthMidd,adminAuth.getAdmin)
 
 // route for admin login 
 router.post('/login', adminAuth.login);

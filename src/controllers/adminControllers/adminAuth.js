@@ -12,6 +12,7 @@ const cryptoRandomString = require('crypto-random-string');
 const fs = require('fs');
 const { parse } = require('path');
 const Sequilize = require('sequelize').Sequelize;
+const { async } = require('crypto-random-string');
 const op = Sequilize.Op;
 const privateKEY = fs.readFileSync('./private.key', 'utf8');
 require('dotenv').config();
@@ -49,9 +50,7 @@ module.exports = {
             };
             //creating options
             const signOptions = {
-                // issuer: i,
-                // subject: s,
-                // audience: a,
+                
                 expiresIn: "12h",
                 algorithm: "RS512"
             };
@@ -62,8 +61,7 @@ module.exports = {
                     if (err) { throw err };
                     res.json({ token })
                 });
-            // console.log(token);
-            // return res.json({admin})
+           
         } catch (error) {
             console.error(error.message);
             res.status(500).send("server error");
@@ -73,17 +71,17 @@ module.exports = {
         console.log("seller create controller runs")
 
         const { email, full_name, date_of_birth, cnic, phone, address, pharmacy_license, store_name, } = req.body;
-     let seller = await Seller.findOne({where:{phone}})
-        if(seller) return res.status(400).json({msg:"seller already exist with this field(s)"})
+        let seller = await Seller.findOne({ where: { phone } })
+        if (seller) return res.status(400).json({ msg: "seller already exist with this field(s)" })
 
-         seller = await Seller.findOne({where:{email}})
-        if(seller) return res.status(400).json({msg:"seller already exist with this field(s)"})
+        seller = await Seller.findOne({ where: { email } })
+        if (seller) return res.status(400).json({ msg: "seller already exist with this field(s)" })
 
-         seller = await Seller.findOne({where:{cnic}})
-        if(seller) return res.status(400).json({msg:"seller already exist with this field(s)"})
+        seller = await Seller.findOne({ where: { cnic } })
+        if (seller) return res.status(400).json({ msg: "seller already exist with this field(s)" })
 
         let { password } = req.body;
-        if (!email || !full_name || !date_of_birth || !cnic || !phone || !address || !pharmacy_license || !store_name) {
+        if (!email || !full_name || !date_of_birth || !cnic || !phone || !address || !store_name) {
             return res.status(400).json("Some fields missing");
         }
         try {
@@ -212,17 +210,17 @@ module.exports = {
         console.log("rider create controller runs")
 
         const { email, full_name, date_of_birth, cnic, phone, address, driving_license } = req.body;
-        let rider = await Rider.findOne({where:{phone}})
-        if(rider) return res.status(400).json({msg:"rider already exist with this field(s)"})
+        let rider = await Rider.findOne({ where: { phone } })
+        if (rider) return res.status(400).json({ msg: "rider already exist with this field(s)" })
 
-         rider = await Rider.findOne({where:{email}})
-        if(rider) return res.status(400).json({msg:"rider already exist with this field(s)"})
+        rider = await Rider.findOne({ where: { email } })
+        if (rider) return res.status(400).json({ msg: "rider already exist with this field(s)" })
 
-         rider = await Rider.findOne({where:{cnic}})
-        if(rider) return res.status(400).json({msg:"rider already exist with this field(s)"})
+        rider = await Rider.findOne({ where: { cnic } })
+        if (rider) return res.status(400).json({ msg: "rider already exist with this field(s)" })
 
         let { password } = req.body;
-        if (!email || !full_name || !date_of_birth || !cnic || !phone || !address || !driving_license) {
+        if (!email || !full_name || !date_of_birth || !cnic || !phone || !address ) {
             return res.status(400).json("Some fields missing");
         }
         // const role = "subadmin";
@@ -439,7 +437,7 @@ module.exports = {
             order: [
                 ['createdAt', 'DESC']
             ]
-            , where: { iscompleted: true }, attributes: ['id', 'iscompleted', 'inprocess', 'createdAt','amount'], include: [{ model: Seller, attributes: ['full_name', 'email', 'store_name'] }, { model: Rider, attributes: ['full_name'] }, { model: Customer, attributes: ['full_name'] }]
+            , where: { iscompleted: true }, attributes: ['id', 'iscompleted', 'inprocess', 'createdAt', 'amount'], include: [{ model: Seller, attributes: ['full_name', 'email', 'store_name'] }, { model: Rider, attributes: ['full_name'] }, { model: Customer, attributes: ['full_name'] }]
         })
             .then((orders) => {
                 res.status(200).json({ orders })
@@ -477,7 +475,7 @@ module.exports = {
 
     },
     forgetPassword: async (req, res) => {
-        const { email } = req.params;
+        const { email } = req.body;
         Admin.findOne({ where: { email } })
             .then((admin) => {
                 if (!admin) {
@@ -494,7 +492,7 @@ module.exports = {
                     .then(() => {
                         console.log(newPassword, passwordHash, "new pas,password hash")
                         const msg = {
-                            to: 'hussainashir9090@gmail.com',
+                            to: `${email}`,
                             from: 'hussainashir87@gmail.com',
                             subject: 'Request for new password',
                             text: 'Your password has been changed',
@@ -513,7 +511,7 @@ module.exports = {
     uploadDrivingLicense: async (req, res) => {
         const { id } = req.query;
         // const newfilename=res.locals.newfilename
-        if (!id) return res.status(404).json({ msg: "bad request" })
+        if (!id) return res.status(400).json({ msg: "bad request" })
         let image
         // let newfilename
         const form = new formidable.IncomingForm();
@@ -527,9 +525,9 @@ module.exports = {
 
             let newfilename = Date.now()
             console.log(newfilename)
-            image = newfilename
             newfilename += format
-            file.path = "./uploads/drivingLicense/images/" + newfilename
+            image = newfilename
+            file.path = "src/public/uploads/drivinglicense/" + newfilename
             // image = newfilename
             // uploaded=true;
         })
@@ -560,7 +558,7 @@ module.exports = {
     uploadPharmacyLicense: async (req, res) => {
         const { id } = req.query;
         // const newfilename=res.locals.newfilename
-        if (!id) return res.status(404).json({ msg: "bad request" })
+        if (!id) return res.status(400).json({ msg: "bad request" })
         let image
         // let newfilename
         const form = new formidable.IncomingForm();
@@ -574,9 +572,9 @@ module.exports = {
 
             let newfilename = Date.now()
             console.log(newfilename)
-            image = newfilename
             newfilename += format
-            file.path = "./uploads/pharmacyLicense/images/" + newfilename
+            image = newfilename
+            file.path = "src/public/uploads/pharmacylicense/" + newfilename
             // image = newfilename
             // uploaded=true;
         })
@@ -604,22 +602,129 @@ module.exports = {
                 return res.status(500).send("server error");
             })
     },
-    getAdmin:(req,res)=>{
+    getAdmin: (req, res) => {
         try {
             // console.log('from controller',req.payload.id)
-            const id=req.payload.id
-            Admin.findOne({ where: { id },attributes:['id','full_name','phone','email'] })
-            .then((Admin)=>{
-                return res.status(200).json({Admin})
-            })
-            .catch((err) => {
-                console.log(err)
-                return res.status(500).send("server error");
-            })
+            const id = req.payload.id
+            Admin.findOne({ where: { id }, attributes: ['id', 'full_name', 'phone', 'email'] })
+                .then((Admin) => {
+                    return res.status(200).json({ Admin })
+                })
+                .catch((err) => {
+                    console.log(err)
+                    return res.status(500).send("server error");
+                })
         } catch (error) {
             console.log(err)
             return res.status(500).send("server error");
         }
-    }
+    },
+
+    getDashboardStats: async (req, res) => {
+        //confirm orders
+        let noofcompleted;
+        let noofpending;
+        let revenue = [];
+        let totalrevenue;
+
+        //confirm orders
+        await Order.count({
+            where: { iscompleted: true },
+        }).then(complete => {
+            noofcompleted = complete;
+        })
+            .catch(err => res.status(500).json(err));
+
+        //Pending orders
+        await Order.count({
+            where: { iscompleted: false },
+        }).then(pending => {
+            noofpending = pending;
+        })
+            .catch(err => res.status(500).json(err));
+
+        //Total Revenue
+        await Order.findAll({
+            where: { iscompleted: true }, attributes: ['amount']
+        }).then(r => {
+            for (let t = 0; t < r.length; t++) {
+                revenue.push(Number(r[t].amount))
+            }
+            console.log(revenue);
+            totalrevenue = revenue.reduce((a, b) => a + b, 0)
+        })
+            .catch(err => res.status(500).json(err));
+        console.log(totalrevenue);
+
+        res.json({
+            noofcompleted,
+            noofpending,
+            totalrevenue
+        });
+
+
+
+    },
+
+    getAllRatingsRiders: (req, res) => {
+
+        //getting all users
+        Rider.findAll({
+            where: {
+                isDelete: false,
+            }
+
+            , attributes: ['id', 'full_name', 'cnic'], include:
+                [{ model: Order, attributes: ['riderRating'] }]
+        })
+            .then((users) => {
+                let riders = JSON.parse(JSON.stringify(users));
+                for (let j = 0; j < riders.length; j++) {
+                    let sumofRating = 0, avgRating = 0;
+                    for (let i = 0; i < riders[j].orders.length; i++) {
+                        sumofRating += riders[j].orders[i].riderRating;
+                    }
+                    avgRating = sumofRating/riders[j].orders.length
+                    riders[j].averageRating = avgRating;
+                }
+                res.status(200).json({ riders })
+
+            })
+            .catch(err => {
+                console.log(err.message)
+                return res.status(500).json({ err: err.name })
+            })
+    },
+
+    getAllRatingSellers:(req,res)=>{
+        //getting all users
+        Seller.findAll({
+            where:{
+                isDelete:false,
+            },
+            attributes:['id','full_name','cnic'],include:
+            [{model: Order , attributes:['sellerRating']}]
+        })
+        .then((users)=>{
+            let sellers = JSON.parse(JSON.stringify(users));
+            for(let j = 0 ; j < sellers.length ; j++){
+                let sumofRating = 0 , avgRating = 0;
+                for (let i = 0; i < sellers[j].orders.length; i++) {
+                    sumofRating += sellers[j].orders[i].sellerRating;
+                    
+                }
+
+                avgRating =sumofRating/sellers[j].orders.length
+                sellers[j].averageRating=avgRating;
+            }
+
+            res.status(200).json({sellers})
+        })
+        .catch(err=>{
+            console.log(err.message)
+            return res.status(500).json({err:err.name})
+        })
+
+    }   
 
 }

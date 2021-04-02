@@ -27,6 +27,7 @@ app.use(cors());
 //     res.send("Hello World");
 // })
 //for admin routes
+app.use(express.static(path.join(__dirname, 'public')));
 app.use('/admin', admin);
 
 //for customer routes

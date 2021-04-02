@@ -2,17 +2,17 @@ const bcrypt = require('bcryptjs');
 const Customer = require('../../models/customer');
 const Verification = require('../../models/verification');
 const formidable = require('formidable');
-const Order =require('../../models/order');
+const Order = require('../../models/order');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const privateKEY = fs.readFileSync('./private.key', 'utf8');
 const cryptoRandomString = require('crypto-random-string');
 const sgMail = require('@sendgrid/mail');
 const webpush = require("web-push");
-const publicVapidKey ="BLDECqQgUgclNByCuKfh7F5Y863XpwVwcpgTwNDxqnw829GTmHHxYnJ3gso3FegKDSeeivjAp0Q4dGzyBu9KDZw";
+const publicVapidKey = "BLDECqQgUgclNByCuKfh7F5Y863XpwVwcpgTwNDxqnw829GTmHHxYnJ3gso3FegKDSeeivjAp0Q4dGzyBu9KDZw";
 const privateVapidKey = "UoL2MqxRUQjDcJYZTnSmKbfqQglwODIOgNnrMcNmvK4";
 webpush.setVapidDetails("mailto:test@test.com",
-publicVapidKey,privateVapidKey);
+	publicVapidKey, privateVapidKey);
 
 // const { where } = require('sequelize/types');
 require('dotenv').config();
@@ -83,11 +83,11 @@ module.exports = {
 		const { id, token } = req.query;
 		Verification.findOne({ where: { token } })
 			.then(() => {
-				Customer.update({isVerified:true},{ where: { id }})
+				Customer.update({ isVerified: true }, { where: { id } })
 					.then(() => {
 						Verification.destroy({ where: { token } })
 							.then(() => {
-							// console.log(a)
+								// console.log(a)
 								return res.json({ msg: "customer verified" })
 							})
 							.catch((error) => {
@@ -105,65 +105,65 @@ module.exports = {
 				return res.status(500).send("server error");
 			})
 	},
-	login:async(req,res)=>{
-const {email,password}=req.body;
-console.log(typeof email)
-if (!email || !password) {
-	// console.log("loging runusind")
-	return res.status(400).json({msg:"username or password missing"});
-}
-try {
-	const customer = await Customer.findOne({ where: { email } })
-	// console.log(admin.email);
-	// console.log(admin.password);
-	if (!customer) {
-		return res.status(404).json({ msg: "invalid credentials" });
-	}
-	if(customer.isVerified=='false'){
-		return res.status(403).json({msg:"forbidden Please verify your email first"})
-	}
-	//    console.log (admin)
-	const isMatch = await bcrypt.compare(password, customer.password);
-	console.log(isMatch);
-	if (!isMatch) {
-		return res.status(400).json({ msg: "wrong password" });
-		// console.log('if run');
-	}
-	const payload = {
-		customer: {
-			id: customer.id,
-			email: customer.email,
-			username: customer.full_name,
-			role: 'customer'
-
+	login: async (req, res) => {
+		const { email, password } = req.body;
+		console.log(typeof email)
+		if (!email || !password) {
+			// console.log("loging runusind")
+			return res.status(400).json({ msg: "username or password missing" });
 		}
-	};
-	//creating options
-	const signOptions = {
-		// issuer: i,
-		// subject: s,
-		// audience: a,
-		expiresIn: "12h",
-		algorithm: "RS512"
-	};
-	//jwt token creation
-	jwt.sign(payload, privateKEY, signOptions
-		// res.json(token);
-		, (err, token) => {
-			if (err) { throw err };
-			res.json({ token })
-		});
-	// console.log(token);
-	// return res.json({admin})
-	
-} catch (error) {
-	console.error(error.message);
-	return res.status(500).send("server error");
-}
+		try {
+			const customer = await Customer.findOne({ where: { email } })
+			// console.log(admin.email);
+			// console.log(admin.password);
+			if (!customer) {
+				return res.status(404).json({ msg: "invalid credentials" });
+			}
+			if (customer.isVerified == 'false') {
+				return res.status(403).json({ msg: "forbidden Please verify your email first" })
+			}
+			//    console.log (admin)
+			const isMatch = await bcrypt.compare(password, customer.password);
+			console.log(isMatch);
+			if (!isMatch) {
+				return res.status(400).json({ msg: "wrong password" });
+				// console.log('if run');
+			}
+			const payload = {
+				customer: {
+					id: customer.id,
+					email: customer.email,
+					username: customer.full_name,
+					role: 'customer'
+
+				}
+			};
+			//creating options
+			const signOptions = {
+				// issuer: i,
+				// subject: s,
+				// audience: a,
+				expiresIn: "12h",
+				algorithm: "RS512"
+			};
+			//jwt token creation
+			jwt.sign(payload, privateKEY, signOptions
+				// res.json(token);
+				, (err, token) => {
+					if (err) { throw err };
+					res.json({ token })
+				});
+			// console.log(token);
+			// return res.json({admin})
+
+		} catch (error) {
+			console.error(error.message);
+			return res.status(500).send("server error");
+		}
 
 
 	},
-	placeOrder:async(req,res)=>{
+	placeOrder: async (req, res) => {
 		// const {id,items,itemsQuantity}=req.body;
 		let image;
 		try {
@@ -173,12 +173,12 @@ try {
 				// console.log(name)
 				file.name = file.name.replace(/\s/g, '');
 				let format = file.name.slice(file.name.lastIndexOf('.'))
-				if (format !== ".jpg" && format !== ".jpeg"&&format!=='.JPG') return res.json({ msg: "please upload image in jpg or jpeg format" })
+				if (format !== ".jpg" && format !== ".jpeg" && format !== '.JPG') return res.json({ msg: "please upload image in jpg or jpeg format" })
 				// console.log(format)
-				
+
 				let newfilename = Date.now()
 				image = newfilename
-				newfilename+=format
+				newfilename += format
 
 				file.path = "./uploads/priscription/images/" + newfilename
 				// image = newfilename
@@ -190,7 +190,7 @@ try {
 					// console.log(fields)
 					if (err) {
 						console.log(err);
-					console.log("reject")
+						console.log("reject")
 						reject()
 						return;
 					}
@@ -198,44 +198,44 @@ try {
 					resolve(fields);
 				});
 			})
-			let {id,items,itemsQuantity}=formfields;
-			if(items.length&&itemsQuantity.length){
-			console.log("ashorhussain",id,items.length,itemsQuantity.length,image)
-			items=items.split(',')
-			itemsQuantity=itemsQuantity.split(',')
-			console.log(items,itemsQuantity)
- 
+			let { id, items, itemsQuantity } = formfields;
+			if (items.length && itemsQuantity.length) {
+				console.log("ashorhussain", id, items.length, itemsQuantity.length, image)
+				items = items.split(',')
+				itemsQuantity = itemsQuantity.split(',')
+				console.log(items, itemsQuantity)
+
 			}
-			else{
-				items=[]
-				itemsQuantity=[]
-				console.log(items,itemsQuantity)
+			else {
+				items = []
+				itemsQuantity = []
+				console.log(items, itemsQuantity)
 			}
-			if(!items.length&&!itemsQuantity.length&&!image){
-				return res.status(404).json({msg:"no data found"})
+			if (!items.length && !itemsQuantity.length && !image) {
+				return res.status(404).json({ msg: "no data found" })
 			}
-		
+
 			Order.create({
-				customer_id:id,
+				customer_id: id,
 				image,
-				items:items,
-				itemsQuantity:itemsQuantity
+				items: items,
+				itemsQuantity: itemsQuantity
 			})
 				.then(() => {
 					//push notifications for sellers
-					const title="push notifications"
-					const message="this is push notification"
-					const subscription="An order has been arrived"
+					const title = "push notifications"
+					const message = "this is push notification"
+					const subscription = "An order has been arrived"
 					const payload = JSON.stringify({ title, message });
 					webpush.sendNotification(subscription, payload)
-					.catch((err) => console.error("err", err));
+						.catch((err) => console.error("err", err));
 
 					console.log("then")
-				return res.status(200).json({ msg: "order is been placed" })
+					return res.status(200).json({ msg: "order is been placed" })
 				})
-				.catch((error)=>{
+				.catch((error) => {
 					console.log(error)
-			return res.status(500).send("server error");
+					return res.status(500).send("server error");
 
 				})
 		}
@@ -246,34 +246,34 @@ try {
 		}
 		/////
 	},
-	addReview:(req,res)=>{
-		const {customer_id,order_id,review}=req.body;
-		if (!customer_id || !order_id||!review) {
+	addReview: (req, res) => {
+		const { customer_id, order_id, review } = req.body;
+		if (!customer_id || !order_id || !review) {
 			// console.log("loging runusind")
-			return res.status(400).json({msg:"customer, order id and review required"});
+			return res.status(400).json({ msg: "customer, order id and review required" });
 		}
 		try {
-			Order.findOne({where:{id:order_id}})
-			.then((order)=>{
-				if(order.customer_id!==customer_id){
-					return res.status(400).send("Bad Request")
-				}
-				Order.update( {review },
-				{ where: { id:order_id } })
-				.then(()=>{
-					return res.status(200).json({msg:"Review added successfully"})
+			Order.findOne({ where: { id: order_id } })
+				.then((order) => {
+					if (order.customer_id !== customer_id) {
+						return res.status(400).send("Bad Request")
+					}
+					Order.update({ review },
+						{ where: { id: order_id } })
+						.then(() => {
+							return res.status(200).json({ msg: "Review added successfully" })
+						})
 				})
-			})
-			.catch((error)=>{
-				console.error(error.message);
-			return	res.status(404).send("No order Found");
+				.catch((error) => {
+					console.error(error.message);
+					return res.status(404).send("No order Found");
 
-			})
-			
+				})
+
 		} catch (error) {
 			console.error(error.message);
 			res.status(500).send("server error");
 		}
-console.log("review added")
+		console.log("review added")
 	}
 }

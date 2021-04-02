@@ -101,5 +101,13 @@ router.post('/upload-diving-license',adminAuthMidd,adminAuth.uploadDrivingLicens
 //route for upload pharma license image
 router.post('/upload-pharma-license',adminAuthMidd,adminAuth.uploadPharmacyLicense)
 
+//route for dashboard stats
+router.get('/stats',adminAuthMidd,adminAuth.getDashboardStats)
+
+//route for Riders Rating
+router.get('/riderrating',adminAuthMidd,adminAuth.getAllRatingsRiders)
+
+//route for Seller Rating
+router.get('/sellerrating',adminAuth.getAllRatingSellers)
 
 module.exports = router;

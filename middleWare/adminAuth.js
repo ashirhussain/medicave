@@ -18,21 +18,21 @@ module.exports = (req, res, next) => {
 	try {
 		// 
 		const verifyOptions = {
-			
+
 			expiresIn: "12h",
 			algorithm: ["RS512"]
 		};
 
 		const decoded = jwt.verify(token, publicKEY, verifyOptions);
-		
-        console.log(decoded.user.role)
-        if(decoded.user.role=='admin'){
 
-req.payload=decoded.user
-            next();
-        }
+		console.log(decoded.user.role)
+		if (decoded.user.role == 'admin') {
 
-		
+			req.payload = decoded.user
+			next();
+		}
+
+
 	} catch (error) {
 		console.error(error);
 		res.status(401).json({ msg: "token is not valid" });

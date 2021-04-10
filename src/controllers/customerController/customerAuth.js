@@ -44,14 +44,14 @@ module.exports = {
 						.then(() => {
 
 							const msg = {
-								to: 'hussainashir9090@gmail.com',
+								to: email,
 								from: 'hussainashir87@gmail.com',
 								subject: 'Account Verification Email',
 								text: 'Please click on the link below to verify your account',
 								html: `<strong>http://localhost:5000/customer/verification?id=${id}&token=${token}</strong>`,
 							};
-							sgMail.send(msg);
-							return res.json({ msg: "email sended! Please verify account" })
+							sgMail.send(msg).catch(e=> console.log(e));
+							return res.json({ msg: "email sended! Please verify account", data: token })
 						})
 
 
@@ -119,7 +119,7 @@ module.exports = {
 			if (!customer) {
 				return res.status(404).json({ msg: "invalid credentials" });
 			}
-			if (customer.isVerified == 'false') {
+			if (customer.isVerified == false) {
 				return res.status(403).json({ msg: "forbidden Please verify your email first" })
 			}
 			//    console.log (admin)
@@ -200,7 +200,7 @@ module.exports = {
 			})
 			let { id, items, itemsQuantity } = formfields;
 			if (items.length && itemsQuantity.length) {
-				console.log("ashorhussain", id, items.length, itemsQuantity.length, image)
+				console.log("Ali Raza", id, items.length, itemsQuantity.length, image)
 				items = items.split(',')
 				itemsQuantity = itemsQuantity.split(',')
 				console.log(items, itemsQuantity)

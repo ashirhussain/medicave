@@ -275,5 +275,24 @@ module.exports = {
 			res.status(500).send("server error");
 		}
 		console.log("review added")
+	},
+	getCustomer:(req,res)=>{
+		try{
+			const id = req.payload.id
+			Customer.findOne({where:{ id }, attributes:['id','full_name', 'email', 'password', 'date_of_birth', 'cnic', 'phone', 'address'] })
+			.then((Customer)=>{
+				return res.status(200).json({Customer})
+			})
+			.catch((err)=>{
+				console.log(err)
+				return res.status(500).send("This user does not exist")
+			})
+		}catch(error){
+			console.log(error)
+			return res.status(500).send("Server Error")
+
+
+		}
 	}
+
 }
